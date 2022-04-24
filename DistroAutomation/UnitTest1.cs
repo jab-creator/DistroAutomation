@@ -50,7 +50,7 @@ namespace DistroAutomation
             homePage.GoButton.Click();
 
             //IWebElement distributionTable = Driver.FindElement(By.CssSelector("body>table.Logo>tbody>tr>td:nth-child(3)>table:nth-child(3)"));
-            IList<IWebElement> tableRows = homePage.DistributionTable.FindElements(By.TagName("tr"));
+            IList<IWebElement> tableRows = homePage.TableRows();
             
             foreach (var distro in topFive )
             {
@@ -69,9 +69,39 @@ namespace DistroAutomation
             HomePage homePage = new HomePage(Driver);
 
             homePage.DataSpanOptions.Click();
-            homePage.SelectDataSpan("Trending past 6 months");
+            homePage.SelectDataSpan("Last 6 months");
             homePage.GoButton.Click();
+            IList<IWebElement> tableRows = homePage.TableRows();
 
+            foreach (var row in tableRows)
+            {
+                Debug.Print(row.Text);
+                
+                IWebElement positionChange = homePage.PositionChange(row);
+                string title = positionChange.GetAttribute("title");
+                string shortTitle = title.Substring(title.IndexOf(" ")+1);
+
+                Int32.TryParse(shortTitle, out int previousHPD);
+                Int32.TryParse(positionChange.Text, out int currentHPD);
+                
+                string movementImageLink = homePage.MovementImageLink(positionChange);
+                Debug.Print(movementImageLink);
+                if (currentHPD > previousHPD)
+                {
+                    Debug.Print("current is bigger");
+                }
+                else if (currentHPD < previousHPD)
+                {
+                    Debug.Print("Current is smaller");
+                }
+                else if(previousHPD == currentHPD)
+                {
+                    Debug.Print("HPD is equal");
+                }
+
+                Debug.Print(positionChange.Text);
+            }
+            Debug.Print(tableRows[0].Text);
 
         }
         [TearDown]

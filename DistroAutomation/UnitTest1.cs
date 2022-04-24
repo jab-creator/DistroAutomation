@@ -18,7 +18,7 @@ namespace DistroAutomation
         }
 
         [Test]
-        public void Test1()
+        public void ChechTopFive()
         {
             var topFive = new Dictionary<string, string>()
             {
@@ -34,33 +34,19 @@ namespace DistroAutomation
             homePage.DataSpanOptions.Click();
             homePage.SelectDataSpan("Year 2005");
 
-            //Helpers.ChangeDataSpan(Driver, "2005");
-            //IList<IWebElement> options = homePage.DataSpanOptions.FindElements(By.TagName("option"));
-            //string[] topFive = { "Ubuntu", "Mandriva", "SUSE", "Fedora", "MEPIS" };
-            //foreach (var option in options)
-            //{
-            //    if (option.GetDomProperty("value") == "2005")
-            //    {
-            //        option.Click();
-            //    }
-            //}
-
-            //IWebElement goButton = Driver.FindElement(By.XPath("/html/body/table[2]/tbody/tr/td[3]/table[2]/tbody/tr[2]/td/form/input"));
-            //IWebElement goButton = Driver.FindElement(By.CssSelector("body>table.Logo>tbody>tr>td:nth-child(3)>table:nth-child(3)>tbody>tr:nth-child(2)>td>form>input[type=submit]"));
             homePage.GoButton.Click();
 
-            //IWebElement distributionTable = Driver.FindElement(By.CssSelector("body>table.Logo>tbody>tr>td:nth-child(3)>table:nth-child(3)"));
             IList<IWebElement> tableRows = homePage.TableRows();
             
             foreach (var distro in topFive )
             {
-                int rowOfRank;
-                Int32.TryParse(distro.Key, out rowOfRank);
-                string rowText = tableRows[rowOfRank + 2].Text;
+                Int32.TryParse(distro.Key, out int rowOfRank);
+                string rowText = tableRows[rowOfRank-1].Text;
                 Debug.Print(rowText);
                 string[] rowTextArray = rowText.Split(" ");
+                string actualRank = rowTextArray[0];
                 Debug.Print(rowTextArray[0]);
-                Assert.AreEqual(rowTextArray[0], distro.Key);
+                Assert.AreEqual(distro.Key, actualRank);
             }
         }
         [Test]
@@ -83,19 +69,26 @@ namespace DistroAutomation
 
                 Int32.TryParse(shortTitle, out int previousHPD);
                 Int32.TryParse(positionChange.Text, out int currentHPD);
-                
+
+                string GreenImgLink = "images/other/aup.png";
+                string RedImgLink = "images/other/adown.png";
+                string levelImgLink = "images/other/alevel.png";
+
                 string movementImageLink = homePage.MovementImageLink(positionChange);
                 Debug.Print(movementImageLink);
-                if (currentHPD > previousHPD)
+                if (currentHPD > previousHPD & movementImageLink == GreenImgLink)
                 {
-                    Debug.Print("current is bigger");
+                    Debug.Print("Current is bigger");
+                    Assert.Pass($"Correct green arrow displayed: {currentHPD} > {previousHPD} - {row.Text}");
                 }
-                else if (currentHPD < previousHPD)
+                else if (currentHPD < previousHPD & movementImageLink == RedImgLink)
                 {
                     Debug.Print("Current is smaller");
+                    Assert.Pass($"Correct red arrow displayed: {currentHPD} < {previousHPD} - {row.Text}");
                 }
-                else if(previousHPD == currentHPD)
+                else if(previousHPD == currentHPD & movementImageLink == levelImgLink)
                 {
+                    Assert.Pass($"Correct red arrow displayed: {currentHPD} = {previousHPD} - {row.Text}");
                     Debug.Print("HPD is equal");
                 }
 

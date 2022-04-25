@@ -23,7 +23,7 @@ namespace DistroAutomation
             HomePage homePage = new HomePage(Driver); //initialising home page instance
 
             homePage.DataSpanOptions.Click(); //selecting the dropdown
-            homePage.SelectDataSpan("Year 2005"); //selecting the year
+            homePage.SelectDataSpan(Configs.DataSpanOption.Year2005); //selecting the year
 
             homePage.GoButton.Click(); //clicking the go button
 
@@ -33,10 +33,10 @@ namespace DistroAutomation
             {
                 Int32.TryParse(distro.Key, out int rowOfRank); //parsing the rank from a string to a int
                 string rowText = tableRows[rowOfRank-1].Text; //getting the row for the rank we are comparing to. -1 as lists have 0 based index
-                Debug.Print(rowText);
+
                 string[] rowTextArray = rowText.Split(" "); //splitting the row
                 string actualRank = rowTextArray[0]; //actual rank on site
-                Debug.Print(rowTextArray[0]);
+
                 Assert.AreEqual(distro.Key, actualRank); //asserting that they are equal
             }
         }
@@ -46,7 +46,7 @@ namespace DistroAutomation
             HomePage homePage = new HomePage(Driver); // initialising home page instance
 
             homePage.DataSpanOptions.Click(); //selecting the dropdown
-            homePage.SelectDataSpan("Last 6 months"); //selecting the year
+            homePage.SelectDataSpan(Configs.DataSpanOption.Last6Months); //selecting the year
             homePage.GoButton.Click(); //clicking the go button
             IList<IWebElement> tableRows = homePage.TableRows(); //getting the returned table rows
 
@@ -59,23 +59,25 @@ namespace DistroAutomation
                 Int32.TryParse(shortTitle, out int previousHPD); //previous HDP, parsing to int
                 Int32.TryParse(positionChange.Text, out int currentHPD); //current HDP, parsing to int
 
-                string movementImageLink = homePage.MovementImageLink(positionChange);
+                string movementImageLink = homePage.MovementImageLink(positionChange); //the img that is diplayed
 
-                if (currentHPD > previousHPD & movementImageLink == Configs.ImgLink.GreenImgLink)
+                if (currentHPD > previousHPD & movementImageLink == Configs.ImgLink.GreenImgLink) //asserting that the image is green
                 {
                     Assert.Pass($"Correct green arrow displayed: {currentHPD} > {previousHPD} - {row.Text}");
                 }
-                else if (currentHPD < previousHPD & movementImageLink == Configs.ImgLink.RedImgLink)
+                else if (currentHPD < previousHPD & movementImageLink == Configs.ImgLink.RedImgLink)  //asserting that the image is red
                 {
-                    Assert.Pass($"Correct red arrow displayed: {currentHPD} < {previousHPD} - {row.Text}");
+                    Assert.Pass($"Correct red arrow displayed: {currentHPD} < {previousHPD} - {row.Text}"); 
                 }
-                else if(previousHPD == currentHPD & movementImageLink == Configs.ImgLink.levelImgLink)
+                else if(previousHPD == currentHPD & movementImageLink == Configs.ImgLink.levelImgLink) //assertting that the image is level/black
                 {
                     Assert.Pass($"Correct red arrow displayed: {currentHPD} = {previousHPD} - {row.Text}");
                 }
+                else
+                {
+                    Assert.Fail($"Incorrect arrow image displayed for position change - Current HDP: {currentHPD} Previous HPD: {previousHPD} Row: {row.Text}"); //failing if non of the above are true
+                }
             }
-            Debug.Print(tableRows[0].Text);
-
         }
         [TearDown]
         public void TearDown()

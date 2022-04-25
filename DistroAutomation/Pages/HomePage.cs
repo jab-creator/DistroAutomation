@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using SeleniumExtras.PageObjects;
 using OpenQA.Selenium;
 using System.Diagnostics;
+using NUnit.Framework;
 
 namespace DistroAutomation.Pages
 {
@@ -16,19 +17,26 @@ namespace DistroAutomation.Pages
             PageFactory.InitElements(driver, this);
         }
 
-        [FindsBy(How = How.Name, Using = "dataspan")]
+        [FindsBy(How = How.Name, Using = "dataspan")] 
         public IWebElement DataSpanOptions { get; set; }
 
         public void SelectDataSpan(string value)
         {
             IList<IWebElement> options = DataSpanOptions.FindElements(By.TagName("option"));
 
-            foreach (var option in options)
+            try
             {
-                if (option.Text == value)
+                foreach (var option in options) //iterates through all the options and clicks
                 {
-                    option.Click();
+                    if (option.Text == value)
+                    {
+                        option.Click();
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                Assert.Fail($"Unable to select option specified: {value}" );
             }
         }
 
@@ -42,7 +50,7 @@ namespace DistroAutomation.Pages
         {
             IList<IWebElement> allTableRows = DistributionTable.FindElements(By.TagName("tr"));
             IList<IWebElement> tableRows = new List<IWebElement>();
-            for (int i = 3; i < allTableRows.Count; i++)
+            for (int i = 3; i < allTableRows.Count; i++) //removing the top 3 rows as they are not part of the returned results
             {
                 tableRows.Add(allTableRows[i]);
             }
@@ -53,14 +61,14 @@ namespace DistroAutomation.Pages
         {
             IList<IWebElement> tdTags = row.FindElements(By.TagName("td"));
             Debug.Print(tdTags[0].Text);
-            IWebElement positionChange = tdTags[1];
+            IWebElement positionChange = tdTags[1]; //the second td contains the postion change
             return positionChange;
         }
 
         public string MovementImageLink(IWebElement positionChange)
         {
-            IWebElement movementImage = positionChange.FindElement(By.TagName("img"));
-            string movementImageLink = movementImage.GetDomAttribute("src");
+            IWebElement movementImage = positionChange.FindElement(By.TagName("img")); //getting the image element
+            string movementImageLink = movementImage.GetDomAttribute("src"); //getting the image link used
             return movementImageLink;
         }
     }

@@ -22,5 +22,10 @@ namespace DistroAutomation
             public static string RedImgLink = "images/other/adown.png";
             public static string levelImgLink = "images/other/alevel.png";
         }
+        public static class DataSpanOption
+        {
+            public static string Year2005 = "Year 2005";
+            public static string Last6Months = "Last 6 months";
+        }
     }
 }

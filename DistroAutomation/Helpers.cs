@@ -1,4 +1,5 @@
 ﻿using DistroAutomation.Pages;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System;
@@ -22,25 +23,15 @@ namespace DistroAutomation
         }
         public static void Launch(IWebDriver driver, string url)
         {
-            driver.Navigate().GoToUrl(url);
-            driver.Manage().Window.Position = new System.Drawing.Point(-2000, 0); //repositions the browser to the screen on the left, change to 2000 to move it right
-            driver.Manage().Window.Maximize();
-        }
-
-        public static void ChangeDataSpan(IWebDriver driver, string value) //no longer needed
-        {
-            HomePage homePage = new HomePage(driver);
-
-            homePage.DataSpanOptions.Click(); 
-
-            IList<IWebElement> options = homePage.DataSpanOptions.FindElements(By.TagName("option"));
-
-            foreach (var option in options)
+            try
             {
-                if (option.GetDomProperty("value") == value)
-                {
-                    option.Click();
-                }
+                driver.Navigate().GoToUrl(url);
+                driver.Manage().Window.Position = new System.Drawing.Point(-2000, 0); //repositions the browser to the screen on the left, change to 2000 to move it right
+                driver.Manage().Window.Maximize();
+            }
+            catch (Exception)
+            {
+                Assert.Fail($"Unable to launch browser/url: {url}");
             }
         }
     }

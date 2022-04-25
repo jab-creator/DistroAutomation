@@ -19,80 +19,60 @@ namespace DistroAutomation
 
         [Test]
         public void ChechTopFive()
-        {
-            var topFive = new Dictionary<string, string>()
+        {  
+            HomePage homePage = new HomePage(Driver); //initialising home page instance
+
+            homePage.DataSpanOptions.Click(); //selecting the dropdown
+            homePage.SelectDataSpan("Year 2005"); //selecting the year
+
+            homePage.GoButton.Click(); //clicking the go button
+
+            IList<IWebElement> tableRows = homePage.TableRows(); //getting the returned table rows
+
+            foreach (var distro in Configs.topFive) //iterating though each of the configs that need to be checked
             {
-                {"1", "Ubuntu" },
-                {"2", "Mandriva" },
-                {"3", "SUSE"},
-                {"4", "Fedora" },
-                {"5", "MEPIS" }
-            };
-            
-            HomePage homePage = new HomePage(Driver);
-
-            homePage.DataSpanOptions.Click();
-            homePage.SelectDataSpan("Year 2005");
-
-            homePage.GoButton.Click();
-
-            IList<IWebElement> tableRows = homePage.TableRows();
-            
-            foreach (var distro in topFive )
-            {
-                Int32.TryParse(distro.Key, out int rowOfRank);
-                string rowText = tableRows[rowOfRank-1].Text;
+                Int32.TryParse(distro.Key, out int rowOfRank); //parsing the rank from a string to a int
+                string rowText = tableRows[rowOfRank-1].Text; //getting the row for the rank we are comparing to. -1 as lists have 0 based index
                 Debug.Print(rowText);
-                string[] rowTextArray = rowText.Split(" ");
-                string actualRank = rowTextArray[0];
+                string[] rowTextArray = rowText.Split(" "); //splitting the row
+                string actualRank = rowTextArray[0]; //actual rank on site
                 Debug.Print(rowTextArray[0]);
-                Assert.AreEqual(distro.Key, actualRank);
+                Assert.AreEqual(distro.Key, actualRank); //asserting that they are equal
             }
         }
         [Test]
         public void CheckIndicatorArrows()
         {
-            HomePage homePage = new HomePage(Driver);
+            HomePage homePage = new HomePage(Driver); // initialising home page instance
 
-            homePage.DataSpanOptions.Click();
-            homePage.SelectDataSpan("Last 6 months");
-            homePage.GoButton.Click();
-            IList<IWebElement> tableRows = homePage.TableRows();
+            homePage.DataSpanOptions.Click(); //selecting the dropdown
+            homePage.SelectDataSpan("Last 6 months"); //selecting the year
+            homePage.GoButton.Click(); //clicking the go button
+            IList<IWebElement> tableRows = homePage.TableRows(); //getting the returned table rows
 
-            foreach (var row in tableRows)
-            {
-                Debug.Print(row.Text);
-                
-                IWebElement positionChange = homePage.PositionChange(row);
-                string title = positionChange.GetAttribute("title");
-                string shortTitle = title.Substring(title.IndexOf(" ")+1);
+            foreach (var row in tableRows) //iterating through each row
+            {  
+                IWebElement positionChange = homePage.PositionChange(row); //getting the cell with the position change info
+                string title = positionChange.GetAttribute("title"); //getting yesterdays info
+                string shortTitle = title.Substring(title.IndexOf(" ")+1); // only need the number
 
-                Int32.TryParse(shortTitle, out int previousHPD);
-                Int32.TryParse(positionChange.Text, out int currentHPD);
-
-                string GreenImgLink = "images/other/aup.png";
-                string RedImgLink = "images/other/adown.png";
-                string levelImgLink = "images/other/alevel.png";
+                Int32.TryParse(shortTitle, out int previousHPD); //previous HDP, parsing to int
+                Int32.TryParse(positionChange.Text, out int currentHPD); //current HDP, parsing to int
 
                 string movementImageLink = homePage.MovementImageLink(positionChange);
-                Debug.Print(movementImageLink);
-                if (currentHPD > previousHPD & movementImageLink == GreenImgLink)
+
+                if (currentHPD > previousHPD & movementImageLink == Configs.ImgLink.GreenImgLink)
                 {
-                    Debug.Print("Current is bigger");
                     Assert.Pass($"Correct green arrow displayed: {currentHPD} > {previousHPD} - {row.Text}");
                 }
-                else if (currentHPD < previousHPD & movementImageLink == RedImgLink)
+                else if (currentHPD < previousHPD & movementImageLink == Configs.ImgLink.RedImgLink)
                 {
-                    Debug.Print("Current is smaller");
                     Assert.Pass($"Correct red arrow displayed: {currentHPD} < {previousHPD} - {row.Text}");
                 }
-                else if(previousHPD == currentHPD & movementImageLink == levelImgLink)
+                else if(previousHPD == currentHPD & movementImageLink == Configs.ImgLink.levelImgLink)
                 {
                     Assert.Pass($"Correct red arrow displayed: {currentHPD} = {previousHPD} - {row.Text}");
-                    Debug.Print("HPD is equal");
                 }
-
-                Debug.Print(positionChange.Text);
             }
             Debug.Print(tableRows[0].Text);
 

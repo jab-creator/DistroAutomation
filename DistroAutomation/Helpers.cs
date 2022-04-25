@@ -27,7 +27,7 @@ namespace DistroAutomation
             driver.Manage().Window.Maximize();
         }
 
-        public static void ChangeDataSpan(IWebDriver driver, string value)
+        public static void ChangeDataSpan(IWebDriver driver, string value) //no longer needed
         {
             HomePage homePage = new HomePage(driver);
 
